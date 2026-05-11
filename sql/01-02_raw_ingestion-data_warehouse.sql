@@ -1,0 +1,1 @@
+CREATE DATABASE mo4tvquiz;
