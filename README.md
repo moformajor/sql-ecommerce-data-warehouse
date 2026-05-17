@@ -2,36 +2,56 @@
 
 ## Overview
 
-This project demonstrates the design and implementation of a modern SQL-based data warehouse using the Brazilian E-Commerce Public Dataset by Olist. The solution transforms raw transactional data into a structured analytical environment that supports business intelligence, reporting, and decision-making.
+This project demonstrates the design and implementation of a modern SQL-based data warehouse using the Brazilian E-Commerce Public Dataset by Olist.
 
-The project follows real-world data engineering and analytics workflows including data ingestion, data modeling, ETL processes, dimensional modeling, and SQL analytics.
+The solution transforms raw transactional CSV data into a clean analytical warehouse structure that supports business intelligence, reporting, KPI analysis, and decision-making.
+
+The project follows real-world data engineering and analytics workflows including:
+
+- Raw data ingestion
+- Data cleaning
+- Data transformation
+- Dimensional modeling
+- Star schema design
+- KPI analysis
+- Customer analytics
+- Revenue analysis
 
 ---
 
 # Business Problem
 
-E-commerce companies generate large volumes of transactional data from customers, orders, payments, products, sellers, and logistics. However, raw operational data is often fragmented and difficult to analyze efficiently.
+E-commerce companies generate large volumes of transactional data from customers, orders, products, and logistics systems.
 
-This project solves the following business challenges:
+However, raw operational data is often:
 
-- Lack of centralized reporting
-- Difficulty tracking customer purchasing behavior
-- Limited visibility into sales performance
-- Poor insight into delivery efficiency
-- Challenges identifying top-performing products and sellers
-- Inability to perform scalable analytical queries
+- fragmented
+- inconsistent
+- difficult to analyze
+- poorly optimized for reporting
 
-The data warehouse consolidates and organizes the data into analytical structures that support faster and more reliable business insights.
+This creates several business challenges:
+
+- Limited visibility into revenue trends
+- Difficulty analyzing customer behavior
+- Challenges identifying top-performing products
+- Slow analytical querying
+- Inability to perform scalable reporting
+- Poor understanding of order performance
+
+This project solves these problems by transforming raw CSV data into a structured dimensional warehouse optimized for analytics.
 
 ---
 
 # Project Objectives
 
-- Build a scalable SQL data warehouse
+The main objectives of this project were to:
+
+- Build a professional SQL data warehouse
 - Clean and transform raw e-commerce data
-- Design star schema dimensional models
+- Design a dimensional star schema
 - Create fact and dimension tables
-- Enable analytical querying and reporting
+- Enable analytical reporting
 - Generate business insights from transactional data
 
 ---
@@ -42,17 +62,17 @@ Dataset Used:
 
 - Brazilian E-Commerce Public Dataset by Olist
 
+Dataset Source:
+
+- Kaggle
+
 The dataset contains information about:
 
 - Customers
 - Orders
-- Order items
-- Payments
+- Order Items
 - Products
-- Sellers
-- Reviews
-- Geolocation
-- Delivery information
+- Delivery Information
 
 ---
 
@@ -60,60 +80,233 @@ The dataset contains information about:
 
 | Technology | Purpose |
 |---|---|
-| SQL Server / PostgreSQL | Database Management |
+| MySQL | Database Management |
 | SQL | Data Transformation & Analysis |
 | Git & GitHub | Version Control |
-| Power BI (Optional) | Data Visualization |
 | CSV Files | Raw Data Source |
+| MySQL Workbench | Database Modeling & Querying |
 
 ---
 
 # Data Warehouse Architecture
 
-The project follows a layered architecture:
+The project follows a layered warehouse architecture.
 
 ## 1. Raw Layer
-Stores original imported CSV datasets.
 
-## 2. Staging Layer
-Cleans and standardizes raw data.
+Stores imported CSV datasets exactly as received.
 
-## 3. Data Warehouse Layer
-Implements dimensional models using:
+Raw tables created:
 
-- Fact Tables
-- Dimension Tables
-- Star Schema
+- raw_olist_orders
+- raw_olist_order_items
+- raw_olist_customers
+- raw_olist_products
+
+Purpose:
+- preserve original data
+- support repeatable transformations
+- prevent accidental data corruption
 
 ---
 
-# Data Model
+## 2. Warehouse Layer
 
-## Fact Tables
+Cleaned and transformed analytical tables.
 
-- FactOrders
-- FactPayments
-- FactSales
+### Fact Table
 
-## Dimension Tables
+#### `fact_orders`
 
-- DimCustomers
-- DimProducts
-- DimSellers
-- DimDate
-- DimGeolocation
+Stores measurable business events.
+
+Grain:
+
+```text
+One row per order_id
+```
+
+Contains:
+
+- revenue
+- freight revenue
+- item counts
+- order dates
+- order status
+- customer references
+
+---
+
+### Dimension Tables
+
+#### `dim_customers`
+
+Stores customer information including:
+
+- customer IDs
+- city
+- state
+- zip code
+
+---
+
+#### `dim_products`
+
+Stores product information including:
+
+- product category
+- product dimensions
+- product weight
+
+---
+
+#### `dim_date`
+
+Stores reusable calendar attributes including:
+
+- year
+- month
+- quarter
+- weekday
+- month name
+
+---
+
+# Star Schema Design
+
+The warehouse follows a star schema design.
+
+Relationships:
+
+```text
+dim_customers ─── fact_orders ─── dim_date
+```
+
+The fact table acts as the center of the warehouse while dimension tables provide descriptive analytical context.
 
 ---
 
 # ETL Process
 
-The ETL pipeline includes:
+The ETL pipeline included:
 
-1. Extract raw CSV data
-2. Transform and clean data
-3. Remove duplicates and null values
-4. Standardize formats
-5. Load transformed data into warehouse tables
+1. Extract raw CSV files
+2. Load raw data into staging tables
+3. Clean and standardize values
+4. Convert text values into proper datatypes
+5. Aggregate item-level revenue
+6. Load transformed data into warehouse tables
+
+---
+
+# Real-World Challenges Solved
+
+## 1. Missing Values Stored as Empty Strings
+
+### Problem
+
+The imported CSV files did not contain proper SQL NULL values.
+
+Missing values appeared as:
+
+```sql
+''
+```
+
+This caused:
+- incorrect null detection
+- datatype conversion problems
+- inaccurate aggregations
+
+### Solution
+
+Used:
+
+```sql
+NULLIF(TRIM(column_name), '')
+```
+
+to convert empty strings into proper SQL NULL values.
+
+---
+
+## 2. Revenue Grain Mismatch
+
+### Problem
+
+Revenue existed at order-item level while the warehouse fact table was designed at order level.
+
+This created a grain mismatch problem.
+
+### Solution
+
+Revenue was aggregated using:
+
+```sql
+GROUP BY order_id
+SUM(price + freight_value)
+```
+
+before loading into `fact_orders`.
+
+This preserved the warehouse grain:
+
+```text
+one row per order_id
+```
+
+---
+
+## 3. Date Conversion Challenges
+
+### Problem
+
+Order timestamps were imported as TEXT values.
+
+This prevented:
+- date analysis
+- month grouping
+- trend analysis
+- date calculations
+
+### Solution
+
+Used:
+
+```sql
+STR_TO_DATE()
+```
+
+to convert timestamps into proper MySQL date formats.
+
+---
+
+## 4. Investigating AOV Similarities
+
+### Problem
+
+Overall AOV and delivered-order AOV initially appeared identical.
+
+This seemed mathematically suspicious.
+
+### Investigation
+
+Performed:
+- order status distribution analysis
+- weighted average analysis
+- precision comparison
+
+### Finding
+
+Discovered that:
+- approximately 97% of orders were delivered
+- delivered orders dominated revenue
+- rounding to 2 decimal places hid small differences
+
+This demonstrated the importance of:
+- precision handling
+- weighted averages
+- distribution analysis
 
 ---
 
@@ -122,93 +315,271 @@ The ETL pipeline includes:
 This project helps answer important business questions such as:
 
 - What are the top-selling product categories?
-- Which sellers generate the highest revenue?
 - What are customer purchasing trends?
 - Which regions generate the most sales?
-- What is the average delivery time?
-- Which payment methods are most used?
-- How do customer reviews impact sales?
+- What is the Average Order Value (AOV)?
+- What is the repeat customer rate?
+- Which months generate the highest revenue?
+- Which customers generate the highest revenue?
+- How does order status affect revenue?
 
 ---
 
 # Sample SQL Analysis
 
-## Top Revenue Generating Products
+## 1. Revenue & AOV Analysis
+
+### Business Question
+
+```text
+What is the total revenue and average order value?
+```
+
+### SQL Query
 
 ```sql
-SELECT product_category_name,
-       SUM(payment_value) AS total_revenue
-FROM fact_sales
-GROUP BY product_category_name
+SELECT
+    COUNT(DISTINCT order_id) AS total_orders,
+
+    ROUND(SUM(total_revenue), 2) AS total_revenue,
+
+    ROUND(
+        SUM(total_revenue) /
+        COUNT(DISTINCT order_id),
+        2
+    ) AS aov
+
+FROM fact_orders;
+```
+
+---
+
+## 2. Monthly Revenue Trend
+
+### Business Question
+
+```text
+How does revenue change over time?
+```
+
+### SQL Query
+
+```sql
+SELECT
+    d.year,
+    d.month,
+    d.month_name,
+
+    ROUND(SUM(f.total_revenue), 2) AS total_revenue
+
+FROM fact_orders f
+
+LEFT JOIN dim_date d
+    ON f.order_date = d.date_key
+
+GROUP BY
+    d.year,
+    d.month,
+    d.month_name
+
+ORDER BY
+    d.year,
+    d.month;
+```
+
+---
+
+## 3. Revenue by Customer State
+
+### Business Question
+
+```text
+Which regions generate the most sales?
+```
+
+### SQL Query
+
+```sql
+SELECT
+    c.customer_state,
+
+    ROUND(SUM(f.total_revenue), 2) AS total_revenue
+
+FROM fact_orders f
+
+LEFT JOIN dim_customers c
+    ON f.customer_id = c.customer_id
+
+GROUP BY c.customer_state
 ORDER BY total_revenue DESC;
 ```
 
-## Monthly Sales Trend
+---
+
+## 4. Top Product Categories
+
+### Business Question
+
+```text
+Which product categories generate the most revenue?
+```
+
+### SQL Query
 
 ```sql
-SELECT order_month,
-       SUM(payment_value) AS monthly_sales
-FROM fact_sales
-GROUP BY order_month
-ORDER BY order_month;
+SELECT
+    p.product_category_name,
+
+    COUNT(*) AS total_items_sold,
+
+    ROUND(
+        SUM(
+            CAST(NULLIF(TRIM(oi.price), '') AS DECIMAL(10,2))
+        ),
+        2
+    ) AS total_product_revenue
+
+FROM raw_olist_order_items oi
+
+LEFT JOIN dim_products p
+    ON TRIM(oi.product_id) = p.product_id
+
+GROUP BY p.product_category_name
+ORDER BY total_product_revenue DESC
+LIMIT 20;
 ```
+
+---
+
+## 5. RFM Customer Analysis
+
+### Business Question
+
+```text
+Who are the highest-value customers?
+```
+
+### SQL Query
+
+```sql
+WITH customer_rfm AS (
+
+    SELECT
+        c.customer_unique_id,
+
+        DATEDIFF(
+            (SELECT MAX(order_date) FROM fact_orders),
+            MAX(f.order_date)
+        ) AS recency_days,
+
+        COUNT(DISTINCT f.order_id) AS frequency,
+
+        ROUND(SUM(f.total_revenue), 2) AS monetary
+
+    FROM fact_orders f
+
+    LEFT JOIN dim_customers c
+        ON f.customer_id = c.customer_id
+
+    GROUP BY c.customer_unique_id
+)
+
+SELECT *
+FROM customer_rfm
+ORDER BY monetary DESC
+LIMIT 20;
+```
+
+---
+
+# Key Project Outcomes
+
+The final warehouse successfully enabled:
+
+- Revenue analysis
+- Customer behavior analysis
+- Time-series reporting
+- Regional sales analysis
+- Product performance analysis
+- Repeat customer analysis
+- RFM customer segmentation
+- Analytical SQL reporting
+
+The project also demonstrated real-world solutions to:
+- datatype inconsistencies
+- missing values
+- warehouse grain mismatches
+- timestamp conversion issues
+- analytical debugging challenges
 
 ---
 
 # Project Structure
 
-```bash
+```text
 sql-ecommerce-data-warehouse/
 │
-├── data/
 ├── sql/
-├── staging/
-├── warehouse/
-├── analytics/
+│   ├── 01_raw_ingestion.sql
+│   ├── 02_data_understanding.sql
+│   ├── 03_build_warehouse.sql
+│   └── 04_kpi_analysis.sql
+│
 ├── screenshots/
-├── README.md
+│   ├── erd_schema.png
+│   ├── kpi_summary.png
+│   ├── monthly_revenue_trend.png
+│   ├── rfm_analysis.png
+│   └── top_product_categories.png
+│
+├── docs/
+│   └── project_notes.md
+│
+└── README.md
 ```
 
 ---
 
 # Key Skills Demonstrated
 
-- Data Warehousing
+This project demonstrates practical skills in:
+
 - SQL Development
-- ETL Pipeline Design
 - Data Cleaning
+- Data Transformation
+- Data Warehousing
 - Dimensional Modeling
-- Business Intelligence
+- Star Schema Design
+- KPI Reporting
+- Revenue Analytics
+- Customer Analytics
+- RFM Segmentation
+- Data Engineering
 - Analytical Querying
-- Database Optimization
-- Git Version Control
+- Git & GitHub
 
 ---
 
 # Future Improvements
 
-- Automate ETL pipeline
-- Add Power BI dashboard
-- Implement incremental loading
-- Deploy to cloud platform
-- Add data quality monitoring
+Possible future improvements include:
 
----
+- Building Power BI dashboards
+- Automating ETL workflows
+- Adding product-level fact tables
+- Implementing incremental loading
+- Deploying warehouse to cloud infrastructure
 
-# Author
 
-## Uzochukwu Constantine Umejiofor
-
-Data Analyst | SQL Developer | Business Intelligence Enthusiast
-
-Portfolio:
-https://moformajor.github.io
-
-GitHub:
-https://github.com/moformajor
-
----
 
 # Conclusion
 
-This project demonstrates how raw e-commerce data can be transformed into a structured analytical data warehouse capable of supporting strategic business decisions and scalable reporting solutions.
+This project demonstrates how raw e-commerce transactional data can be transformed into a clean dimensional warehouse capable of supporting business intelligence, KPI reporting, customer analytics, and scalable SQL analysis.
+
+The final solution reflects real-world data engineering and analytics practices including:
+- ETL workflows
+- dimensional modeling
+- warehouse design
+- data cleaning
+- KPI reporting
+- analytical problem solving
