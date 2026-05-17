@@ -378,7 +378,7 @@ FROM fact_orders;
 
 ### Output
 
-<img src="screenshots/Business Summary KPI.png" width="1000">
+<img src="screenshots/business_summary_kpi.png" width="1000">
 
 ---
 
@@ -417,7 +417,7 @@ ORDER BY
 
 ### Output
 
-<img src="screenshots/monthly revenue trend.png" width="1000">
+<img src="screenshots/monthly_revenue_trend.png" width="1000">
 
 ---
 
@@ -483,7 +483,7 @@ LIMIT 20;
 
 ### Output
 
-<img src="screenshots/Top Product Categories.png" width="1000">
+<img src="screenshots/top_product_categories.png" width="1000">
 
 ---
 
@@ -528,7 +528,7 @@ LIMIT 20;
 
 ### Output
 
-<img src="screenshots/RFM QUERY.png" width="1000">
+<img src="screenshots/rfm_query.png" width="1000">
 
 ---
 
