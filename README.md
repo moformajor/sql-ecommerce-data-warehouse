@@ -186,6 +186,30 @@ The fact table acts as the center of the warehouse while dimension tables provid
 
 ---
 
+# Schema Diagram
+
+<img src="screenshots/schema.png" width="1000">
+
+---
+
+# Warehouse Tables
+
+<img src="screenshots/tables.png" width="1000">
+
+---
+
+# Fact Orders Table Sample
+
+<img src="screenshots/fact_order_table.png" width="1000">
+
+---
+
+# Product Dimension Table
+
+<img src="screenshots/dim_product.png" width="1000">
+
+---
+
 # ETL Process
 
 The ETL pipeline included:
@@ -352,6 +376,10 @@ SELECT
 FROM fact_orders;
 ```
 
+### Output
+
+<img src="screenshots/Business Summary KPI.png" width="1000">
+
 ---
 
 ## 2. Monthly Revenue Trend
@@ -386,6 +414,10 @@ ORDER BY
     d.year,
     d.month;
 ```
+
+### Output
+
+<img src="screenshots/monthly revenue trend.png" width="1000">
 
 ---
 
@@ -449,6 +481,10 @@ ORDER BY total_product_revenue DESC
 LIMIT 20;
 ```
 
+### Output
+
+<img src="screenshots/Top Product Categories.png" width="1000">
+
 ---
 
 ## 5. RFM Customer Analysis
@@ -490,6 +526,10 @@ ORDER BY monetary DESC
 LIMIT 20;
 ```
 
+### Output
+
+<img src="screenshots/RFM QUERY.png" width="1000">
+
 ---
 
 # Key Project Outcomes
@@ -526,11 +566,14 @@ sql-ecommerce-data-warehouse/
 │   └── 04_kpi_analysis.sql
 │
 ├── screenshots/
-│   ├── erd_schema.png
-│   ├── kpi_summary.png
-│   ├── monthly_revenue_trend.png
-│   ├── rfm_analysis.png
-│   └── top_product_categories.png
+│   ├── Business Summary KPI.png
+│   ├── RFM QUERY.png
+│   ├── Top Product Categories.png
+│   ├── dim_product.png
+│   ├── fact_order_table.png
+│   ├── monthly revenue trend.png
+│   ├── schema.png
+│   └── tables.png
 │
 ├── docs/
 │   └── project_notes.md
@@ -570,7 +613,21 @@ Possible future improvements include:
 - Implementing incremental loading
 - Deploying warehouse to cloud infrastructure
 
+---
 
+# Author
+
+## Uzochukwu Constantine Umejiofor
+
+Data Analyst | SQL Developer | Business Intelligence Enthusiast
+
+Portfolio:
+https://moformajor.github.io
+
+GitHub:
+https://github.com/moformajor
+
+---
 
 # Conclusion
 
@@ -582,4 +639,5 @@ The final solution reflects real-world data engineering and analytics practices 
 - warehouse design
 - data cleaning
 - KPI reporting
+- analytical problem solving
 - analytical problem solving
